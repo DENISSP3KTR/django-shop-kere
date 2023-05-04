@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import Category, Client, Product, Order, Popular_product, Newest_product
+from .models import *
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -11,13 +11,8 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 @admin.register(Client)
-class ProductAdmin(admin.ModelAdmin):
+class ClientAdmin(admin.ModelAdmin):
     list_display = ['name', 'email', 'phone_number']
-    search_fields = ('name',)
-
-@admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description', 'image', 'price', 'amount', 'stock', 'category', 'slug']
     search_fields = ('name',)
 
 @admin.register(Order)
@@ -32,3 +27,19 @@ class Popular_productAdmin(admin.ModelAdmin):
 @admin.register(Newest_product)
 class Newest_productAdmin(admin.ModelAdmin):
     list_display = ['new_product', 'start_date', 'end_date']
+
+class ProductImageAdmin(admin.ModelAdmin):
+  pass
+
+class ProductImageInline(admin.StackedInline):
+  model = ProductImage
+  max_num = 10
+  extra = 0
+
+class ProductAdmin(admin.ModelAdmin):
+  list_display = ['name', 'description', 'price', 'amount', 'stock', 'category', 'created_time', 'update']
+  prepopulated_fields = {'slug': ('name',)}
+  inlines = [ProductImageInline,]
+
+admin.site.register(ProductImage, ProductImageAdmin)
+admin.site.register(Product, ProductAdmin)

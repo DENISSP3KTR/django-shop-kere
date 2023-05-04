@@ -6,12 +6,17 @@ import re
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.text import slugify
+from decimal import Decimal
+
+import os
+from uuid import uuid1
 # Create your models here.
+
 
 class Category(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название")
     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка")
-    image = models.ImageField(upload_to='img/', verbose_name="Изображение")
+    image = models.ImageField(upload_to='category/', verbose_name="Изображение")
 
     class Meta:
         verbose_name = 'Категория'
@@ -24,7 +29,7 @@ class Product(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название")
     description = models.TextField(verbose_name="Описание")
     price = models.DecimalField(max_digits=4, decimal_places=2, verbose_name="Цена")
-    image = models.ImageField(upload_to='img/', verbose_name="Изображение")
+    # images = models.ForeignKey('ProductImage', blank=True, related_name='products', verbose_name="Изображения", on_delete=models.PROTECT)
     amount = models.IntegerField(verbose_name="Количество")
     stock = models.BooleanField(default=True, verbose_name="Наличие")
     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True, null=True)
@@ -41,9 +46,22 @@ class Product(models.Model):
         if not self.slug:
             self.slug = str(self.id)
             super(Product, self).save()
-
     def __str__(self):
         return self.name
+    
+class ProductImage(models.Model):
+    def get_image_path(instance, filename):
+        unique_id = str(instance.id) # id товара
+        return os.path.join('product_images', unique_id, filename)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, related_name="images")
+    image = models.ImageField(upload_to=get_image_path)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Изображение товара'
+        verbose_name_plural = 'Изображения товаров'
+    
 
 class Client(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -55,7 +73,6 @@ class Client(models.Model):
     )
     phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True, verbose_name="Номер телефона")
     create_time = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
-
     class Meta:
         verbose_name = 'Клиент'
         verbose_name_plural = 'Клиенты'
@@ -109,3 +126,25 @@ class Newest_product(models.Model):
 
     def __str__(self):
         return self.popular_product.name
+    
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Клиент")
+    created_at = models.DateTimeField(default=timezone.now, verbose_name="Время создания")
+
+    def __str__(self):
+        return f"Cart {self.id} for {self.user.username}"
+
+    def total(self):
+        return sum(item.subtotal() for item in self.cart_items.all())
+    
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, related_name='cart_items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name}"
+
+    def subtotal(self):
+        return self.quantity * Decimal(self.price)
