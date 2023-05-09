@@ -12,12 +12,12 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ['name', 'email', 'phone_number']
+    list_display = ['name', 'email', 'phone_number', 'create_time']
     search_fields = ('name',)
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['client', 'product', 'quantity', 'price', 'address']
+    list_display = ['client', 'product', 'quantity', 'price', 'address', 'date_ordered', 'is_completed']
     search_fields = ('client',)
 
 @admin.register(Popular_product)
@@ -27,6 +27,7 @@ class Popular_productAdmin(admin.ModelAdmin):
 @admin.register(Newest_product)
 class Newest_productAdmin(admin.ModelAdmin):
     list_display = ['new_product', 'start_date', 'end_date']
+
 
 class ProductImageAdmin(admin.ModelAdmin):
   pass

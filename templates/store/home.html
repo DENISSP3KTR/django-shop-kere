@@ -1,1 +1,11 @@
-home
+{% extends "./base.html" %}
+{% load static %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<main>
+    <div>
+        <img src="{%static '/store/img/logo.png'%}" alt="Bootstrap" width="80" height="80">
+    </div>
+</main>
+{% endblock %}

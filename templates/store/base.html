@@ -1,0 +1,78 @@
+{%load static%}
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+    <title>{% block title %}Главная страница{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{%static 'store/css/base.css'%}" media="screen">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav class="navbar navbar-expand-lg bg-body-tertiary" style = "background: linear-gradient(to right, #FFC2C2 0.69%, #B49EEB 64.78%, #CFF0FF 99.98%);">
+                <div class="container-fluid">
+                    <div class="logo-container">
+                        <a class="navbar-brand" href="#">
+                            <img src="{%static '/store/img/logo.png'%}" alt="Bootstrap" width="80" height="80">
+                        </a>
+                    </div>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample08" aria-controls="navbarsExample08" aria-expanded="false" aria-label="Toggle navigation">
+                        <img src="{%static '/store/img/burger-bar.png'%}" width="53" height="53">
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-md-center " id="navbarNavDropdown">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">О себе</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Помощь</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Доставка</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
+                        <li class="nav-item">
+                            <a href="#" class="collapse navbar-collapse nav-link">
+                                <img src="{%static '/store/img/loupe.png'%}" width="40" height="40">
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="collapse navbar-collapse nav-link">
+                                <img src="{%static '/store/img/shopping-bag.png'%}" width="40" height="40">
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="collapse navbar-collapse nav-link">
+                                <img src="{%static '/store/img/user.png'%}" width="40" height="40">
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="collapse navbar-collapse nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button">
+                                <img src="{%static '/store/img/burger-bar.png'%}" width="42" height="42">
+                            </a>
+                            <ul class="dropdown-menu">
+                                {% comment %} {% for categorie in Category %}
+                                <li class="dropdowntxt"><a class="dropdown-item" href="#" id="asd">{{categorie.name}}</a></li>
+                                {% endfor %} {% endcomment %}
+                                <li class="dropdowntxt"><a class="dropdown-item" href="#" id="asd">Бисер</a></li>
+                                <li class="dropdowntxt"><a class="dropdown-item" href="#" id="asd">Аксессуары</a></li>
+                                <li class="dropdowntxt"><a class="dropdown-item" href="#" id="asd">Бусы</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+    </div>
+</body>
+</html>
+
