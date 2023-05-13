@@ -24,18 +24,34 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+    
+class PodCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Под категория")
+    name = models.CharField(max_length=255, verbose_name="Название", blank=True)
+    slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True)
+    image = models.ImageField(upload_to='category/podcategory', verbose_name="Изображение", blank=True)
 
+    class Meta:
+        verbose_name = 'Под категория'
+        verbose_name_plural = 'Под категории'
+
+    def __str__(self):
+        return self.name
+    
 class Product(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название")
     description = models.TextField(verbose_name="Описание")
-    price = models.DecimalField(max_digits=4, decimal_places=2, verbose_name="Цена")
-    # images = models.ForeignKey('ProductImage', blank=True, related_name='products', verbose_name="Изображения", on_delete=models.PROTECT)
-    amount = models.IntegerField(verbose_name="Количество")
-    stock = models.BooleanField(default=True, verbose_name="Наличие")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
+    amount1 = models.IntegerField(verbose_name="Количество в шт", blank=True)
+    amount2 = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Количество в граммах", blank=True)
+    toorder = models.BooleanField(default=False, verbose_name="На заказ")
+    stock = models.BooleanField(default=True, verbose_name="В наличии")
     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Категория")
+    subcategory = models.ForeignKey(PodCategory, on_delete=models.CASCADE, verbose_name="Под категория")
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
     update = models.DateTimeField(auto_now=True, verbose_name="Время последнего обновления")
+    discount = models.DecimalField(max_digits=4, decimal_places=2, default=0, verbose_name="Скидка")
 
     class Meta:
         verbose_name = "Товар"
@@ -46,6 +62,11 @@ class Product(models.Model):
         if not self.slug:
             self.slug = str(self.id)
             super(Product, self).save()
+    
+    def get_discounted_price(self):
+        discounted_price = self.price - (self.price * self.discount / 100)
+        return discounted_price
+    
     def __str__(self):
         return self.name
     
@@ -125,7 +146,17 @@ class Newest_product(models.Model):
         verbose_name_plural = 'Новые товары'
 
     def __str__(self):
-        return self.popular_product.name
+        return self.new_product.name
+    
+class Sale_product(models.Model):
+    sale_product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Название продукта")
+
+    class Meta:
+        verbose_name = 'Распродажа'
+        verbose_name_plural = 'Распродажа'
+
+    def __str__(self):
+        return self.sale_product.name
     
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Клиент")
