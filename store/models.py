@@ -1,4 +1,5 @@
 from django.db import models
+from mptt.models import MPTTModel, TreeForeignKey
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.core.validators import RegexValidator
@@ -12,43 +13,61 @@ import os
 from uuid import uuid1
 # Create your models here.
 
-
-class Category(models.Model):
+class Category(MPTTModel):
     name = models.CharField(max_length=255, verbose_name="Название")
     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка")
+    parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='Подкатегория')
     image = models.ImageField(upload_to='category/', verbose_name="Изображение")
+    
+    class MPTTMeta:
+        order_insertion_by = ['name']
 
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
+    def save(self, *args, **kwargs):
+        super(Category, self).save(*args, **kwargs)
+        Category.objects.rebuild()
+
     def __str__(self):
         return self.name
+
+# class Category(models.Model):
+#     name = models.CharField(max_length=255, verbose_name="Название")
+#     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка")
+#     image = models.ImageField(upload_to='category/', verbose_name="Изображение")
+
+#     class Meta:
+#         verbose_name = 'Категория'
+#         verbose_name_plural = 'Категории'
+
+#     def __str__(self):
+#         return self.name
     
-class PodCategory(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Под категория")
-    name = models.CharField(max_length=255, verbose_name="Название", blank=True)
-    slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True)
-    image = models.ImageField(upload_to='category/podcategory', verbose_name="Изображение", blank=True)
+# class PodCategory(models.Model):
+#     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Под категория")
+#     name = models.CharField(max_length=255, verbose_name="Название", blank=True)
+#     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True)
+#     image = models.ImageField(upload_to='category/podcategory', verbose_name="Изображение", blank=True)
 
-    class Meta:
-        verbose_name = 'Под категория'
-        verbose_name_plural = 'Под категории'
+#     class Meta:
+#         verbose_name = 'Под категория'
+#         verbose_name_plural = 'Под категории'
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
     
 class Product(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название")
     description = models.TextField(verbose_name="Описание")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
-    amount1 = models.IntegerField(verbose_name="Количество в шт", blank=True)
-    amount2 = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Количество в граммах", blank=True)
+    amount1 = models.IntegerField(verbose_name="Количество в шт", null=True, blank=True)
+    amount2 = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Количество в граммах", null=True, blank=True)
     toorder = models.BooleanField(default=False, verbose_name="На заказ")
     stock = models.BooleanField(default=True, verbose_name="В наличии")
     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Категория")
-    subcategory = models.ForeignKey(PodCategory, on_delete=models.CASCADE, verbose_name="Под категория")
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
     update = models.DateTimeField(auto_now=True, verbose_name="Время последнего обновления")
     discount = models.DecimalField(max_digits=4, decimal_places=2, default=0, verbose_name="Скидка")
