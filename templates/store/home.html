@@ -1,11 +1,34 @@
 {% extends "./base.html" %}
 {% load static %}
-{% block title %}Home{% endblock %}
+{% block title %}Главная страница{% endblock %}
 
 {% block content %}
 <main>
-    <div>
-        asdasd
+    <div class="container" id="catalog">
+        <div class="row">
+            <div class="col-1" >
+                <img id="lin1" class="img-fluid" src="{%static '/store/img/line1.svg'%}" width="100" height="2">
+            </div>
+            <div class="col-2">
+                <h2 class="product-head page-header" align="center"><a href="#" id="main-head-title">Каталог</a></h2>
+            </div>
+            <div class="col-3">
+                <img id="lin2" class="img-fluid" src="{%static '/store/img/line2.svg'%}" width="1020" height="4">
+            </div>
+        </div>
+        <div class="carousel">
+            {% for category in categories %}
+            <div class="catalog-rect mx-auto d-block">
+                <a class="catalog-title mx-auto d-block" href="#">
+                    <img class="catalog-img mx-auto d-block img-fluid mb-3 pt-3" src="{{category.image.url}}" width="70" height="70" style="display:flex;flex-wrap: wrap;">
+                    <p align="center">{{category.name}}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="container">
+        </div>
     </div>
 </main>
+
 {% endblock %}
