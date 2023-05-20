@@ -32,31 +32,6 @@ class Category(MPTTModel):
 
     def __str__(self):
         return self.name
-
-# class Category(models.Model):
-#     name = models.CharField(max_length=255, verbose_name="Название")
-#     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка")
-#     image = models.ImageField(upload_to='category/', verbose_name="Изображение")
-
-#     class Meta:
-#         verbose_name = 'Категория'
-#         verbose_name_plural = 'Категории'
-
-#     def __str__(self):
-#         return self.name
-    
-# class PodCategory(models.Model):
-#     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Под категория")
-#     name = models.CharField(max_length=255, verbose_name="Название", blank=True)
-#     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True)
-#     image = models.ImageField(upload_to='category/podcategory', verbose_name="Изображение", blank=True)
-
-#     class Meta:
-#         verbose_name = 'Под категория'
-#         verbose_name_plural = 'Под категории'
-
-#     def __str__(self):
-#         return self.name
     
 class Product(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название")

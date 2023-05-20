@@ -1,0 +1,13 @@
+@import url(reset.css);
+#main-head-title{
+    color:black;
+    font-family: 'Roboto';
+    font-style: normal;
+	font-weight: 700;
+    text-decoration: none;
+    font-size: 1.5rem;
+}
+#catalog-row{
+    margin: auto;
+    width: 50%!important;
+}

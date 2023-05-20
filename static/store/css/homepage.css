@@ -1,3 +1,14 @@
+@import url(reset.css);
+/* *{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+} */
+/* .sliders-block{
+    width: 100%;
+    display: inline-block;
+    background-color: green;
+} */
 #catalog{
     margin-top: 1.5rem;
     margin-bottom: 1.5rem;
@@ -6,24 +17,13 @@
     padding-top: 7rem!important;
     padding-bottom: 7rem!important;
 }
-.main-link{
-    color:black;
-    font-size: 0.75rem;
-    font-family: 'Roboto';
-    font-style: italic;
-	font-weight: 700;
-    text-decoration: none;
-}
 .catalog-rect{
-    height: 8rem;
-    width: 8rem;
+    height: 9.5rem;
+    width: 150px;
     background-color: white;
     border-radius: 1.5rem;
     margin: 1.5rem;
-}
-#asd{
-    display: flex;
-    flex-wrap: wrap;
+    margin-right: 6rem;
 }
 #main-head-title{
     color:black;
@@ -39,15 +39,15 @@
 .catalog-title{
     color:black;
     font-family: 'Roboto';
-    font-size: 1rem;
+    font-size: 100%;
     font-style: normal;
 	font-weight: 300;
     text-decoration: none;
-    margin-top: 1rem;
+    margin: 0 auto;
 }
 .catalog-title:hover{
-    font-size: 1.02rem;
-    transition: 0.5s;
+    font-size: 1.05rem;
+    transition: 0.1s;
     color:red;
 }
 h2{
@@ -66,6 +66,27 @@ h2{
 }
 .col-3{
     width: 75%!important;
+}
+.sliders{
+    margin: auto;
+}
+.btn{
+    border: none;
+    background: transparent;
+    outline: none;
+}
+.slider-btn{
+    width: 45px;
+    height: 45px;
+    background-color: #cfc3c3;
+    border-radius: 50%;
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.slider-next{
+    right: -10px;
 }
 @media (min-width: 0px) {
     .py-5 {
