@@ -1,3 +1,11 @@
+####
+# Django 
+####
+*.log
+*.pot
+*.pyc
+__pycache__/
+
 # Настройки среды
 .vscode/
 
@@ -5,8 +13,13 @@
 *.pyc
 
 # Библиотеки
+.venv/
 venv/
 
 # База данных
 db.sqlite3
 migrations/
+
+htmlcov/
+.coverage
+.pytest_cache
