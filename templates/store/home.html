@@ -10,17 +10,17 @@
                 <img id="lin1" class="img-fluid" src="{%static '/store/img/line1.svg'%}" width="100" height="2">
             </div>
             <div class="col-2">
-                <h2 class="product-head page-header" align="center"><a href="category" id="main-head-title" style="filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));">Каталог</a></h2>
+                <h2 class="product-head page-header" align="center"><a href="{% url 'store:category' %}" id="main-head-title" style="filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));">Каталог</a></h2>
             </div>
             <div class="col-3">
                 <img id="lin2" class="img-fluid" src="{%static '/store/img/line2.svg'%}" width="1020" height="4">
             </div>
         </div>
-        <div class="sliders">
+        <div class="sliders" id="slider1">
             {% for category in categories %}
             <div class="slider-block">
                 <div class="catalog-rect mx-auto d-block">
-                    <a class="catalog-title mx-auto d-block" href="{{category.slug}}">
+                    <a class="catalog-title mx-auto d-block" href="{{category.get_absolute_url}}">
                         <img class="catalog-img mx-auto d-block img-fluid mb-3 pt-3" src="{{category.image.url}}" width="80" height="80">
                         <p align="center">{{category.name}}</p>
                     </a>
@@ -33,22 +33,62 @@
                 <img id="lin1" class="img-fluid" src="{%static '/store/img/line1.svg'%}" width="100" height="2">
             </div>
             <div class="col-2">
-                <h2 class="product-head page-header" align="center"><a href="#" id="main-head-title" style="filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));">Новинки</a></h2>
+                <h2 class="product-head page-header" align="center"><a href="{%url 'store:new_products'%}" id="main-head-title" style="filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));">Новинки</a></h2>
             </div>
             <div class="col-3">
                 <img id="lin2" class="img-fluid" src="{%static '/store/img/line2.svg'%}" width="1020" height="4">
             </div>
+        </div>
+        <div class="sliders" id="slider2">
+            {% for pp in new_product %}
+            {% with product=pp.new_product %}
+            <div class="slider-block">
+                <div class="product-rect mx-auto d-block" align="center">
+                    <a class="product-title mx-auto d-block" href="{{product.slug}}">
+                        {% if product.product_images.all %}
+                        <img class="product-img mx-auto d-block img-fluid mb-3 pt-3" src="{{product.product_images.first.image.url}}" width="240" height="240">
+                        {% endif %}
+                        <p align="center">{{product.name}}</p>
+                        <br>
+                    </a>
+                    <p class="product-title">{{product.price}} руб.</p>
+                    <br>
+                    <button class="btn btn-dark rounded-pill px-3" type="button" id="btn-buy">Купить</button>
+                </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
         </div>
         <div class="row mt-4">
             <div class="col-1" >
                 <img id="lin1" class="img-fluid" src="{%static '/store/img/line1.svg'%}" width="100" height="2">
             </div>
             <div class="col-2">
-                <h2 class="product-head page-header" align="center"><a href="#" id="main-head-title" style="filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));">Популярные товары</a></h2>
+                <h2 class="product-head page-header" align="center"><a href="{%url 'store:popular_products'%}" id="main-head-title" style="filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));">Популярные товары</a></h2>
             </div>
             <div class="col-3">
                 <img id="lin2" class="img-fluid" src="{%static '/store/img/line2.svg'%}" width="1020" height="4">
             </div>
+        </div>
+        <div class="sliders" id="slider3">
+            {% for pp in popular_product %}
+            {% with product=pp.popular_product %}
+            <div class="slider-block">
+                <div class="product-rect mx-auto d-block" align="center">
+                    <a class="product-title mx-auto d-block" href="{{product.slug}}">
+                        {% if product.product_images.all %}
+                        <img class="product-img mx-auto d-block img-fluid mb-3 pt-3" src="{{product.product_images.first.image.url}}" width="240" height="240">
+                        {% endif %}
+                        <p align="center">{{product.name}}</p>
+                        <br>
+                    </a>
+                    <p class="product-title">{{product.price}} руб.</p>
+                    <br>
+                    <button class="btn btn-dark rounded-pill px-3" type="button" id="btn-buy">Купить</button>
+                </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
         </div>
     </div>
     <script src="{%static 'store\script\jquery-3.7.0.min.js'%}"></script>

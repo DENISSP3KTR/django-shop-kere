@@ -1,0 +1,98 @@
+@import url(reset.css);
+
+
+.login-container{
+    width: 40%;
+    padding: 4rem;
+    background-color: whitesmoke;
+    border-radius: 1.5rem;
+}
+
+.fw-normal{
+    color:black;
+    font-family: 'Roboto';
+    font-style: normal;
+	font-weight: 700 !important;
+}
+
+.form-floating{
+    color:black;
+    font-family: 'Roboto';
+    font-style: normal;
+	font-weight: 400 !important;
+}
+.privacy-caption{
+    color:black;
+    font-family: 'Roboto';
+    font-style: normal;
+	font-weight: 700 !important;
+    text-align: justify;
+    margin-top: 2rem;
+}
+.privacy-text{
+    color:black;
+    font-family: 'Roboto';
+    font-style: normal;
+	font-weight: 300 !important;
+    text-align: justify;
+    margin-top: 1rem;
+}
+.privacy-list{
+    color:black;
+    font-family: 'Roboto';
+    font-style: normal;
+	font-weight: 300 !important;
+    text-align: justify;
+    padding-left: 1rem;
+    margin-top: 1rem;
+}
+.check-label{
+    position: relative;
+    text-align: justify;
+    padding-left: 1rem;
+}
+#sogl{
+    transform: scale(1.5);
+    opacity: 1.2;
+}
+.error{
+    color:red;
+    font-family: 'Roboto';
+    font-style: normal;
+	font-weight: 300 !important;
+}
+@media (min-width: 0px) {
+    .login-container{
+        width: 100%;
+    }
+}
+
+@media (min-width: 576px) {
+    .login-container{
+        width: 100%;
+    }
+}
+
+@media (min-width: 768px) {
+    .login-container{
+        width: 100%;
+    }
+}
+
+@media (min-width: 992px) {
+    .login-container{
+        width: 50%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .login-container{
+        width: 50%;
+    }
+}
+
+@media (min-width: 1400px) {
+    .login-container{
+        width: 40%;
+    }
+}

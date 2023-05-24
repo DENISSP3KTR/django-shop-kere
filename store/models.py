@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 from mptt.models import MPTTModel, TreeForeignKey
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
@@ -8,7 +9,9 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.text import slugify
 from decimal import Decimal
-
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
+from django.urls import reverse
 import os
 from uuid import uuid1
 # Create your models here.
@@ -30,45 +33,56 @@ class Category(MPTTModel):
         super(Category, self).save(*args, **kwargs)
         Category.objects.rebuild()
 
+    def get_absolute_url(self):
+        return reverse('store:category_view', args=[self.slug])
+    
     def __str__(self):
         return self.name
+
+class Сharacteristic(models.Model):
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, blank=True, related_name="product_character")
+    characteristic = models.CharField(max_length=255, verbose_name="Характеристика товара", unique=False)
+    class Meta:
+        verbose_name = 'Характеристика товара'
+        verbose_name_plural = 'Характеристики товара'
+
+    def __str__(self):
+        return self.characteristic
+    
     
 class Product(models.Model):
-    name = models.CharField(max_length=255, verbose_name="Название")
-    description = models.TextField(verbose_name="Описание")
+    name = models.CharField(max_length=255, verbose_name="Название", unique=False)
+    description = models.TextField(verbose_name="Описание", unique=False, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
     amount1 = models.IntegerField(verbose_name="Количество в шт", null=True, blank=True)
     amount2 = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Количество в граммах", null=True, blank=True)
     toorder = models.BooleanField(default=False, verbose_name="На заказ")
     stock = models.BooleanField(default=True, verbose_name="В наличии")
     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True, null=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Категория")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Категория", related_name="products")
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
     update = models.DateTimeField(auto_now=True, verbose_name="Время последнего обновления")
     discount = models.DecimalField(max_digits=4, decimal_places=2, default=0, verbose_name="Скидка")
-
     class Meta:
         verbose_name = "Товар"
         verbose_name_plural = 'Товары'
     
-    def save(self):
-        super(Product, self).save()
+    def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = str(self.id)
-            super(Product, self).save()
-    
-    def get_discounted_price(self):
-        discounted_price = self.price - (self.price * self.discount / 100)
-        return discounted_price
+            self.slug = slugify(f"{self.id}-{self.name}")
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('store:product_detail', args=[self.slug])
     
     def __str__(self):
         return self.name
-    
+
 class ProductImage(models.Model):
     def get_image_path(instance, filename):
         unique_id = str(instance.id) # id товара
         return os.path.join('product_images', unique_id, filename)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, related_name="images")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, related_name="product_images")
     image = models.ImageField(upload_to=get_image_path)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -77,30 +91,38 @@ class ProductImage(models.Model):
         verbose_name = 'Изображение товара'
         verbose_name_plural = 'Изображения товаров'
     
+    def __str__(self):
+        return self.product.name
+    
+@receiver(pre_save, sender=Product)
+def generate_product_slug(sender, instance, **kwargs):
+    if not instance.slug:
+        instance.slug = slugify(f"{instance.id}-{instance.name}")
 
-class Client(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, verbose_name="ФИО")
-    email = models.EmailField(verbose_name="Почта")
+
+class Client(AbstractUser):
+    patronymic = models.CharField(max_length=50, verbose_name="Отчество")
     phone_regex = RegexValidator(
         regex=re.compile(r'^\+?1?\d{9,15}$'),
         message="Номер должен иметь формат: '+999999999'."
     )
     phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True, verbose_name="Номер телефона")
-    create_time = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
+    sogl = models.BooleanField(default=False)
+    
     class Meta:
         verbose_name = 'Клиент'
         verbose_name_plural = 'Клиенты'
 
     def __str__(self):
-        return self.name
+        return self.email
 
 class Order(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="Имя клиента")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Название продукта")
     quantity = models.IntegerField(default=1, verbose_name="Количество")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
-    address = models.CharField(max_length=255, verbose_name="Адрес доставки")
+    delivery_parametr = models.BooleanField(default=False, verbose_name="Самовывоз")
+    address = models.CharField(max_length=255, verbose_name="Адрес доставки", blank=True, null=True)
     date_ordered = models.DateTimeField(auto_now_add=True, verbose_name="Время заказа")
     is_completed = models.BooleanField(default=False, verbose_name="Готово?")
     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True, null=True)
@@ -119,7 +141,8 @@ class Order(models.Model):
         return self.Client.name
 
 class Popular_product(models.Model):
-    popular_product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Название продукта")
+    popular_product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Название продукта", related_name="popular_product")
+    # product_image = models.ForeignKey(ProductImage, on_delete=models.CASCADE, verbose_name="Изображение продукта")
     start_date = models.DateTimeField(default=timezone.now, verbose_name="Начало времени показа")
     end_date = models.DateTimeField(null=True, blank=True, verbose_name="Конец времени показа")
 
@@ -131,7 +154,8 @@ class Popular_product(models.Model):
         return self.popular_product.name
     
 class Newest_product(models.Model):
-    new_product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Название продукта")
+    new_product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Название продукта", related_name="new_product")
+    # product_image = models.ForeignKey(ProductImage, on_delete=models.CASCADE, verbose_name="Название продукта")
     start_date = models.DateTimeField(default=timezone.now, verbose_name="Начало времени показа")
     end_date = models.DateTimeField(null=True, blank=True, verbose_name="Конец времени показа")
 
@@ -153,7 +177,7 @@ class Sale_product(models.Model):
         return self.sale_product.name
     
 class Cart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Клиент")
+    user = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="Клиент")
     created_at = models.DateTimeField(default=timezone.now, verbose_name="Время создания")
 
     def __str__(self):

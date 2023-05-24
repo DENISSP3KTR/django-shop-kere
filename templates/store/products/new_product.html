@@ -1,7 +1,39 @@
-{% extends "./base.html" %}
+{% extends "store/base.html" %}
 {% load static %}
-{% block title %}Главная страница{% endblock %}
+{% block title %}Новинки{% endblock %}
 
 {% block content %}
-
+<main>
+    <div class="container" id="catalog">
+        <div class="row">
+            <div class="col-1" >
+                <img id="lin1" class="img-fluid" src="{%static '/store/img/line1.svg'%}" width="100" height="2">
+            </div>
+            <div class="col-2">
+                <h2 class="product-head page-header" align="center"><a href="" id="main-head-title" style="filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));">Новинки</a></h2>
+            </div>
+            <div class="col-3">
+                <img id="lin2" class="img-fluid" src="{%static '/store/img/line2.svg'%}" width="1020" height="4">
+            </div>
+        </div>
+        <div class="row" align="center">
+        {% for product in product %}
+                <div class="col">
+                    <div class="product-rect mx-auto d-block" align="center">
+                        <a class="product-title mx-auto d-block" href="{{product.new_product.get_absolute_url}}">
+                            {% if product.new_product.product_images.all %}
+                            <img class="product-img mx-auto d-block img-fluid mb-3 pt-3" src="{{product.new_product.product_images.first.image.url}}" width="240" height="240">
+                            {% endif %}
+                            <p align="center">{{product.new_product.name}}</p>
+                            <br>
+                        </a>
+                        <p class="product-title">{{product.new_product.price}} руб.</p>
+                        <br>
+                        <button class="btn btn-dark rounded-pill px-3" type="button" id="btn-buy">Купить</button>
+                    </div>
+                </div>
+        {% endfor %}
+        </div>
+    </div>
+</main>
 {% endblock %}

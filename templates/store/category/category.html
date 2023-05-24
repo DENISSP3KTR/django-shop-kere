@@ -11,7 +11,7 @@
                 <img id="lin1" class="img-fluid" src="{%static '/store/img/line1.svg'%}" width="100" height="2">
             </div>
             <div class="col-2">
-                <h2 class="product-head page-header" align="center"><a href="category/" id="main-head-title" style="filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));">Каталог</a></h2>
+                <h2 class="product-head page-header" align="center"><a href="{% url 'store:category' %}" id="main-head-title" style="filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));">Каталог</a></h2>
             </div>
             <div class="col-3">
                 <img id="lin2" class="img-fluid" src="{%static '/store/img/line2.svg'%}" width="1020" height="4">
@@ -21,7 +21,7 @@
             {% for category in categories %}
             <div class="col">
                 <div class="catalog-rect mx-auto d-block">
-                    <a class="catalog-title mx-auto d-block" href="{{category.slug}}">
+                    <a class="catalog-title mx-auto d-block" href="{{category.get_absolute_url}}">
                         <img class="catalog-img mx-auto d-block img-fluid mb-3 pt-3" src="{{category.image.url}}" width="80" height="80">
                         <p align="center">{{category.name}}</p>
                     </a>

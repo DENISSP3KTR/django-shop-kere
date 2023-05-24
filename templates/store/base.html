@@ -33,7 +33,7 @@
                             <button class="btn btn-outline-success" type="submit">Поиск</button>
                         </form>
                         <li class="nav-item">
-                            <a class="nav-link" href="category">Каталог</a>
+                            <a class="nav-link" href="{% url 'store:category' %}">Каталог</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link d-block d-lg-none" href="#">Корзина</a>
@@ -42,22 +42,31 @@
                             <a class="nav-link d-block d-lg-none" href="#">Распродажа</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link d-block d-lg-none" href="user_profile">Профиль</a>
-                        </li> 
-                        <li class="nav-item">
-                            <a class="nav-link" href="about">О компании</a>
+                            <a class="nav-link" href="{% url 'store:about' %}">О компании</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="support">Помощь</a>
+                            <a class="nav-link" href="{% url 'store:support' %}">Помощь</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="delivery">Доставка</a>
+                            <a class="nav-link" href="{% url 'store:delivery' %}">Доставка</a>
                         </li>
+                        <div class="nav-item dropdown">
+                            <div class="nav-link d-block d-lg-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Профиль</div>
+                            <ul class="dropdown-menu">
+                                {% if user.is_authenticated %}
+                                <li><a class="dropdown-item" href="{%url 'store:user_profile'%}">Профиль</a></li>
+                                <li><a class="dropdown-item" href="{%url 'store:logout_user'%}">Выход</a></li>
+                                {% else %}
+                                <li><a class="dropdown-item" href="{%url 'store:login_user'%}">Вход</a></li>
+                                <li><a class="dropdown-item" href="{%url 'store:register_user'%}">Регистрация</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
                     </ul>
                 </div>
                 <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small" id="asd">
                     <li class="nav-item">
-                        <a href="search" class="collapse navbar-collapse nav-link">
+                        <a href="{% url 'store:search' %}" class="collapse navbar-collapse nav-link">
                             <img src="{%static '/store/img/loupe.png'%}" width="40" height="40">
                         </a>
                     </li>
@@ -71,16 +80,25 @@
                             <img src="{%static '/store/img/discount2.png'%}" width="40" height="40">
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="user_profile" class="collapse navbar-collapse nav-link">
+                    <div class="dropdown">
+                        <div class="collapse navbar-collapse nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="{%static '/store/img/user.png'%}" width="40" height="40">
-                        </a>
-                    </li>
+                        </div>
+                        <ul class="dropdown-menu">
+                            {% if user.is_authenticated %}
+                                <li><a class="dropdown-item" href="{%url 'store:user_profile'%}">Профиль</a></li>
+                                <li><a class="dropdown-item" href="{%url 'store:logout_user'%}">Выход</a></li>
+                            {% else %}
+                                <li><a class="dropdown-item" href="{%url 'store:login_user'%}">Вход</a></li>
+                                <li><a class="dropdown-item" href="{%url 'store:register_user'%}">Регистрация</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
                 </ul>
             </div>
         </nav>
     </header>
-    <div id="content">{% block content %} {% endblock %}</div>
+    <div class="mt-5" id="content">{% block content %} {% endblock %}</div>
 </body>
 </html>
 

@@ -9,6 +9,9 @@
     display: inline-block;
     background-color: green;
 } */
+.slider-block{
+    z-index: 1 !important;
+}
 #catalog{
     margin-top: 1.5rem;
     margin-bottom: 1.5rem;
@@ -19,7 +22,7 @@
 }
 .catalog-rect{
     height: 9.5rem;
-    width: 150px;
+    width: 9.5rem;
     background-color: white;
     border-radius: 1.5rem;
     margin: 1.5rem;
@@ -36,7 +39,7 @@
     color: red;
     font-size: 1.6rem;
 }
-.catalog-title{
+.catalog-title, .product-title{
     color:black;
     font-family: 'Roboto';
     font-size: 100%;
@@ -44,6 +47,9 @@
 	font-weight: 300;
     text-decoration: none;
     margin: 0 auto;
+}
+.product-title{
+    font-size: 110%;
 }
 .catalog-title:hover{
     font-size: 1.05rem;
@@ -70,7 +76,7 @@ h2{
 .sliders{
     margin: auto;
 }
-.btn{
+#btn-arrow{
     border: none;
     background: transparent;
     outline: none;
@@ -85,8 +91,35 @@ h2{
     top: 50%;
     transform: translateY(-50%);
 }
+.slider-btn2{
+    width: 100px;
+    height: 100px;
+    background-color: #cfc3c3;
+    border-radius: 50%;
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    transform: translateY(-50%);
+}
 .slider-next{
     right: -10px;
+}
+.product-rect{
+    height: 23.75rem;
+    width: 16rem;
+    background-color: white;
+    border-radius: 1.5rem;
+    margin: 1.5rem;
+    margin-right: 6rem;
+}
+.product-img{
+    border-radius: 1.5rem;
+}
+#btn-buy{
+    width: 10rem!important;
+    border: none;
+    background: black;
+    outline: none;
 }
 @media (min-width: 0px) {
     .py-5 {
