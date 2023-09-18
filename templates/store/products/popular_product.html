@@ -20,21 +20,44 @@
         <div class="row" align="center">
         {% for product in product %}
                 <div class="col">
-                    <div class="product-rect mx-auto d-block" align="center">
+                    <div class="product-rect mx-auto d-block pt-2" align="center">
                         <a class="product-title mx-auto d-block" href="{{product.popular_product.get_absolute_url}}">
                             {% if product.popular_product.product_images.all %}
-                            <img class="product-img mx-auto d-block img-fluid mb-3 pt-3" src="{{product.popular_product.product_images.first.image.url}}" width="240" height="240">
+                            <div class="product-img mx-auto mb-3">
+                                <img class="img-fluid" src="{{product.popular_product.product_images.first.image.url}}">
+                            </div>
                             {% endif %}
                             <p align="center">{{product.popular_product.name}}</p>
                             <br>
                         </a>
                         <p class="product-title">{{product.popular_product.price}} руб.</p>
                         <br>
-                        <button class="btn btn-dark rounded-pill px-3" type="button" id="btn-buy">Купить</button>
+                        <button class="btn btn-dark rounded-pill px-3 btn-buy" type="button" value="{{product.id}}" id="button-buy{{product.id}}">Купить</button>
                     </div>
                 </div>
         {% endfor %}
         </div>
     </div>
+    <script>
+        $(document).on('click', '.btn-buy', function (e) {
+            e.preventDefault();
+            let lem=this;
+            $.ajax({
+                type: 'POST',
+                url: '{% url "basket:basket_add" %}',
+                data: {
+                    productid: lem.value,
+                    productqty: 1,
+                    csrfmiddlewaretoken: "{{csrf_token}}",
+                    action: 'post'
+                },
+                success: function (json) {
+                    var l = "В корзине";
+                    document.getElementById("button-buy"+lem.value).innerHTML = l;
+                },
+                error: function (xhr, errmsg, err) {}
+            });
+        })
+    </script>
 </main>
 {% endblock %}

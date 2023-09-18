@@ -6,7 +6,8 @@ from store import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('store.urls', namespace='store'))
+    path('', include('store.urls', namespace='store')),
+    path('basket/', include('basket.urls', namespace='basket')),
 ]
 
 if settings.DEBUG:

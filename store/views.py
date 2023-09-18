@@ -1,53 +1,51 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import logout, authenticate, login, get_user_model
+from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
-# Create your views here.
+from django.http import JsonResponse
 from .models import *
-
+from basket.basket import Basket
 from store import forms
 # header templates
 def about_view(request):
     return render(request, 'store/headertemplates/about.html')
-
 def search_form(request):
-    return render(request, 'store/headertemplates/search.html')
-
+    form = forms.ProductSearchForm(request.GET)
+    products = []
+    if form.is_valid():
+        query = form.cleaned_data['query']
+        products = Product.objects.filter(name__icontains=query)
+    return render(request, 'store/headertemplates/search.html', {'form': form, 'products': products})
 def delivery_form(request):
     return render(request, 'store/headertemplates/delivery.html')
-
 def support_form(request):
     return render(request, 'store/headertemplates/support.html')
-
-
-
 # products
 def all_products(request):
     product = Product.objects.all()
     return render(request, 'store/products/product.html', {"product": product})
-
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, stock=True)
-    return render(request, 'store/products/product_detail.html', {'product': product})
-
+    context = {
+        'product': product,
+    }
+    return render(request, 'store/products/product_detail.html', context)
 def new_products(request):
     product = Newest_product.objects.all()
     return render(request, 'store/products/new_product.html', {"product": product})
-
 def popular_products(request):
     product = Popular_product.objects.all()
     return render(request, 'store/products/popular_product.html', {"product": product})
-
 # category
 def parent_category(request):
     categories = Category.objects.filter(parent__isnull=True)
     return render(request, 'store/category/category.html', {"categories": categories})
-
 def pod_category(request):
     podcat = Category.objects.filter(parent__isnull=False)
     return render(request, 'store/category/pod_category.html', {"podcat": podcat})
-
 def category_view(request, category_slug=None):
     category = get_object_or_404(Category, slug=category_slug)
+    basket = Basket(request)
     if category.get_descendants().exists():
         context = {
             'category': category,
@@ -56,13 +54,10 @@ def category_view(request, category_slug=None):
     else:
         context = {
             'category': category,
-            'product': category.products.all(),
+            'product': category.products.filter(stock=True),
+            'basket': basket
         }
         return render(request, 'store/products/product.html', context)
-    
-
-
-
 # base templates
 def home_view(request):
     categories = Category.objects.filter(parent__isnull=True)
@@ -74,10 +69,7 @@ def home_view(request):
         'popular_product': popular_product,
     }
     return render(request, 'store/home.html', context)
-
-
 # user
-
 def login_user(request):
     context = {
         'login_form': forms.LoginForm()
@@ -97,7 +89,6 @@ def login_user(request):
                     'attention': f'Неправильно введены данные!',
                 }
     return render(request, 'store/client/login.html', context)
-
 def register_user(request):
     context = {
         'register_form': forms.RegisterForm()
@@ -124,10 +115,8 @@ def register_user(request):
                 'register_form': forms.RegisterForm()
             }
     return render(request, 'store/client/register.html', context)
-
 def logout_user(request):
     logout(request)
     return redirect('/')
-
 def user_view(request):
     return render(request, 'store/client/user_profile.html')

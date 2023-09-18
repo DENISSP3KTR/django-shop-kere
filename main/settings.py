@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'mptt',
     'allauth',
     'allauth.account',
+    'basket',
 ]
 
 MIDDLEWARE = [
@@ -66,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'basket.context_processors.basket',
             ],
         },
     },
@@ -139,3 +141,6 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
     "/var/www/static/",
 ]
+
+# Basket session ID
+BASKET_SESSION_ID = 'basket'

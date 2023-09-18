@@ -29,3 +29,6 @@ class RegisterForm(forms.Form):
             raise forms.ValidationError("Пароли не совпадают.")
 
         return cleaned_data
+    
+class ProductSearchForm(forms.Form):
+    query = forms.CharField(max_length=100)

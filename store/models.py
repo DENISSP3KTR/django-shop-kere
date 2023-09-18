@@ -10,11 +10,10 @@ from django.utils import timezone
 from django.utils.text import slugify
 from decimal import Decimal
 from django.dispatch import receiver
-from django.db.models.signals import pre_save
+from django.db.models.signals import post_save
 from django.urls import reverse
 import os
 from uuid import uuid1
-# Create your models here.
 
 class Category(MPTTModel):
     name = models.CharField(max_length=255, verbose_name="Название")
@@ -24,7 +23,6 @@ class Category(MPTTModel):
     
     class MPTTMeta:
         order_insertion_by = ['name']
-
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
@@ -38,16 +36,6 @@ class Category(MPTTModel):
     
     def __str__(self):
         return self.name
-
-class Сharacteristic(models.Model):
-    product = models.ForeignKey('Product', on_delete=models.CASCADE, blank=True, related_name="product_character")
-    characteristic = models.CharField(max_length=255, verbose_name="Характеристика товара", unique=False)
-    class Meta:
-        verbose_name = 'Характеристика товара'
-        verbose_name_plural = 'Характеристики товара'
-
-    def __str__(self):
-        return self.characteristic
     
     
 class Product(models.Model):
@@ -55,7 +43,6 @@ class Product(models.Model):
     description = models.TextField(verbose_name="Описание", unique=False, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
     amount1 = models.IntegerField(verbose_name="Количество в шт", null=True, blank=True)
-    amount2 = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Количество в граммах", null=True, blank=True)
     toorder = models.BooleanField(default=False, verbose_name="На заказ")
     stock = models.BooleanField(default=True, verbose_name="В наличии")
     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True, null=True)
@@ -63,21 +50,27 @@ class Product(models.Model):
     created_time = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
     update = models.DateTimeField(auto_now=True, verbose_name="Время последнего обновления")
     discount = models.DecimalField(max_digits=4, decimal_places=2, default=0, verbose_name="Скидка")
+    
     class Meta:
         verbose_name = "Товар"
         verbose_name_plural = 'Товары'
     
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(f"{self.id}-{self.name}")
-        super().save(*args, **kwargs)
-
     def get_absolute_url(self):
         return reverse('store:product_detail', args=[self.slug])
     
     def __str__(self):
         return self.name
+    
+class Сharacteristic(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, related_name="product_character")
+    characteristic = models.CharField(max_length=255, verbose_name="Характеристика товара", unique=False)
+    class Meta:
+        verbose_name = 'Характеристика товара'
+        verbose_name_plural = 'Характеристики товара'
 
+    def __str__(self):
+        return self.product.name
+    
 class ProductImage(models.Model):
     def get_image_path(instance, filename):
         unique_id = str(instance.id) # id товара
@@ -94,10 +87,11 @@ class ProductImage(models.Model):
     def __str__(self):
         return self.product.name
     
-@receiver(pre_save, sender=Product)
-def generate_product_slug(sender, instance, **kwargs):
-    if not instance.slug:
+@receiver(post_save, sender=Product)
+def generate_slug(sender, instance, created, **kwargs):
+    if created and not instance.slug:
         instance.slug = slugify(f"{instance.id}-{instance.name}")
+        instance.save()
 
 
 class Client(AbstractUser):
@@ -108,25 +102,33 @@ class Client(AbstractUser):
     )
     phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True, verbose_name="Номер телефона")
     sogl = models.BooleanField(default=False)
-    
+    slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True, null=True)
     class Meta:
         verbose_name = 'Клиент'
         verbose_name_plural = 'Клиенты'
 
     def __str__(self):
         return self.email
+@receiver(post_save, sender=Client)
+def generate_slug(sender, instance, created, **kwargs):
+    if created and not instance.slug:
+        instance.slug = slugify(f"{instance.id}")
+        instance.save()
+class OrderStatus(models.Model):
+    name = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.name
+    
 class Order(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="Имя клиента")
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Название продукта")
-    quantity = models.IntegerField(default=1, verbose_name="Количество")
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
+    product = models.ManyToManyField(Product, through='OrderItem')
     delivery_parametr = models.BooleanField(default=False, verbose_name="Самовывоз")
     address = models.CharField(max_length=255, verbose_name="Адрес доставки", blank=True, null=True)
     date_ordered = models.DateTimeField(auto_now_add=True, verbose_name="Время заказа")
     is_completed = models.BooleanField(default=False, verbose_name="Готово?")
     slug = models.SlugField(max_length=255, unique=True, verbose_name="Ссылка", blank=True, null=True)
-    
+    status = models.ForeignKey(OrderStatus, on_delete=models.SET_NULL, null=True, verbose_name="Статус заказа")
     def save(self):
         super(Order, self).save()
         if not self.slug:
@@ -138,11 +140,26 @@ class Order(models.Model):
         verbose_name_plural = 'Заказы'
 
     def __str__(self):
-        return self.Client.name
+        return f"{self.client} - Заказ {self.pk}"
+    
+@receiver(post_save, sender=Order)
+def generate_slug(sender, instance, created, **kwargs):
+    if created and not instance.slug:
+        instance.slug = slugify(f"{instance.id}")
+        instance.save()
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Название продукта")
+    quantity = models.PositiveIntegerField(default=1, verbose_name="Количество")
 
+    def __str__(self):
+        return f"{self.order} - {self.product}"
+    
+    def subtotal(self):
+        return self.quantity * Decimal(self.product.price)
+    
 class Popular_product(models.Model):
     popular_product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Название продукта", related_name="popular_product")
-    # product_image = models.ForeignKey(ProductImage, on_delete=models.CASCADE, verbose_name="Изображение продукта")
     start_date = models.DateTimeField(default=timezone.now, verbose_name="Начало времени показа")
     end_date = models.DateTimeField(null=True, blank=True, verbose_name="Конец времени показа")
 
@@ -155,7 +172,6 @@ class Popular_product(models.Model):
     
 class Newest_product(models.Model):
     new_product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Название продукта", related_name="new_product")
-    # product_image = models.ForeignKey(ProductImage, on_delete=models.CASCADE, verbose_name="Название продукта")
     start_date = models.DateTimeField(default=timezone.now, verbose_name="Начало времени показа")
     end_date = models.DateTimeField(null=True, blank=True, verbose_name="Конец времени показа")
 
@@ -175,25 +191,3 @@ class Sale_product(models.Model):
 
     def __str__(self):
         return self.sale_product.name
-    
-class Cart(models.Model):
-    user = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="Клиент")
-    created_at = models.DateTimeField(default=timezone.now, verbose_name="Время создания")
-
-    def __str__(self):
-        return f"Cart {self.id} for {self.user.username}"
-
-    def total(self):
-        return sum(item.subtotal() for item in self.cart_items.all())
-    
-class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, related_name='cart_items', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-
-    def __str__(self):
-        return f"{self.quantity} x {self.product.name}"
-
-    def subtotal(self):
-        return self.quantity * Decimal(self.price)

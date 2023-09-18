@@ -1,7 +1,161 @@
-{% extends "./base.html" %}
+{% extends "store/base.html" %}
 {% load static %}
-{% block title %}Главная страница{% endblock %}
+{% block title %}Корзина{% endblock %}
 
 {% block content %}
-
+<main>
+    <div class="container">
+        <div class="row">
+            <div class="col-1" >
+                <img id="lin1" class="img-fluid" src="{%static '/store/img/line1.svg'%}" width="100" height="2">
+            </div>
+            <div class="col-2">
+                <h2 class="product-head page-header" align="center"><a href="" id="main-head-title" style="filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));">Корзина</a></h2>
+            </div>
+            <div class="col-3">
+                <img id="lin2" class="img-fluid" src="{%static '/store/img/line2.svg'%}" width="1020" height="4">
+            </div>
+        </div>
+        <div class="mt-3"></div>
+        <div class="select-all d-flex">
+            <div class="checkbox d-inline">
+                <input type="checkbox" value="item-select" id="select-all-checkbox"> 
+            </div>
+            <div class="d-inline">
+                <p class="select-title">Выбрать все</p>
+            </div>
+            <div class="delete d-inline">
+                <button id="delete-selected-items-button">Удалить выбранное</button>
+            </div>
+        </div>
+        <div class="row" id="product-list">
+            <div class="col-sm-9">
+            {% for item in basket %}
+            {% with product=item.product %}
+                <div class="cart-item mt-4" align="center" data-index="{{product.id}}">
+                    <div class="row">
+                        <div class="checkbox mt-3">
+                            <label>
+                            <input class="item-checkbox" type="checkbox" value="{{product.id}}" id="select-item{{product.id}}" style="transform: scale(1.5); opacity: 1.2;"> 
+                            </label>
+                        </div>
+                        <div class="col-sm" align="center">
+                            <div class="cart-img">
+                                <img class="img-fluid" src="{{product.product_images.first.image.url}}">
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="cart-name">
+                                <a href="{{product.get_absolute_url}}" class="product-name">{{product.name}}</a>
+                            </div>
+                            <div class="mt-3" align="left">
+                                <a type="button" id="delete-button" data-index="{{product.id}}" class="delete-button text-decoration-none small">Удалить</a>
+                            </div>
+                        </div>
+                        <div class="col-sm" align="center">
+                            <div class="count d-flex mt-5">
+                                <button class="count-btn" id="minus{{product.id}}" onclick="decreaseQuantity({{product.id}})" data-index="{{product.id}}">-</button>
+                                <input class="count-input" id="count-plusminus{{product.id}}" type="text" value="{{item.qty}}" min="1" oninput="validateQuantity({{product.id}})" data-index="{{product.id}}">
+                                <button class="count-btn" id="plus{{product.id}}" onclick="increaseQuantity({{product.id}})" data-index="{{product.id}}">+</button>
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <p class="price">{{product.price}} руб.</p>
+                            <p class="price">В наличии {{product.amount1}} шт.</p>
+                        </div>
+                    </div>
+                </div>
+                {% endwith %}
+                {% endfor %}
+            </div>
+            <div class="col-sm mt-4">
+                <div class="order">
+                    <p class="order-title">Условие заказа</p>
+                    <p class="order-title mt-2">Предупреждаем, что количество считается в штуках. Убедительная просьба посмотреть описание товара</p>
+                    <p class="order-title">Итого:</p>
+                    <p class="order-title" id="total">{{basket.get_total_price}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <link rel="stylesheet" href="{%static 'store/css/cart.css'%}">
+    <script>
+        function increaseQuantity(productid) {
+          var quantityField = document.getElementById("count-plusminus"+productid);
+          var quantity = parseInt(quantityField.value);
+          quantityField.value = quantity + 1;
+        }
+        function decreaseQuantity(productid) {
+          var quantityField = document.getElementById("count-plusminus"+productid);
+          var quantity = parseInt(quantityField.value);
+          if (quantity > 1) {
+            quantityField.value = quantity - 1;
+          }
+        }
+        function validateQuantity(productid) {
+            var quantityField = document.getElementById("count-plusminus"+productid);
+            var quantity = parseInt(quantityField.value);
+            if (isNaN(quantity) || quantity < 1) {
+              quantityField.value = 1;
+            }
+        }
+        $(document).on("click", ".delete-button", function (e) {
+            e.preventDefault();
+            var prodid = $(this).data("index");
+            $.ajax({
+              type: "POST",
+              url: '{% url "basket:basket_delete" %}',
+              data: {
+                productid: $(this).data("index"),
+                csrfmiddlewaretoken: "{{csrf_token}}",
+                action: "post",
+              },
+              success: function (json) {
+                $('.cart-item[data-index="' + prodid + '"]').remove();
+        
+                  if(json.qty == 0){
+                    total = 0
+                    subtotal = 0
+                  }
+                  else{
+                    total = (parseFloat(json.subtotal)).toFixed(2);
+                    subtotal = json.subtotal
+                  }
+                //document.getElementById("subtotal").innerHTML = subtotal;
+                //document.getElementById("count-plusminus"+prodid).innerHTML = json.qty;
+                document.getElementById("total").innerHTML = total;
+              },
+              error: function (xhr, errmsg, err) {},
+            });
+        });
+        $(document).on("click", ".count-btn", function (e) {
+            e.preventDefault();
+            var prodid = $(this).data("index");
+            let quantityField = document.getElementById("count-plusminus"+prodid);
+            $.ajax({
+              type: "POST",
+              url: '{% url "basket:basket_update" %}',
+              data: {
+                productid: $(this).data("index"),
+                productqty: quantityField.value,
+                csrfmiddlewaretoken: "{{csrf_token}}",
+                action: "post",
+              },
+              success: function (json) {
+        
+                total = (parseFloat(json.subtotal)).toFixed(2);
+                document.getElementById("count-plusminus"+prodid).innerHTML = json.qty;
+                //document.getElementById("subtotal").innerHTML = json.subtotal;
+                document.getElementById("total").innerHTML = total;
+              },
+              error: function (xhr, errmsg, err) {},
+            });
+          });
+          $(document).ready(function() {
+            $('#select-all-checkbox').click(function() {
+                $('.item-checkbox').prop('checked', this.checked);
+            });
+        });
+      </script>
+</main>
 {% endblock %}

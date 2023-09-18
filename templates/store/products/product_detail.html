@@ -25,53 +25,68 @@
             <div class="col">
                 <p class="product-name mt-5">{{product.name}}</p>
                 <p class="product-name mt-5">{{product.price}} руб.</p>
-                {% if product.amount1 %}
-                <p class="product-title mt-5">Количество в шт.(в наличии): {{product.amount1}}</p>
-                {% else %}
-                <p class="product-title mt-5">Количество в гр.(в наличии): {{product.amount2}}</p>
-                {% endif %}
+                <p class="product-title mt-5">Количество(в наличии): {{product.amount1}}</p>
                 <div class="d-flex mt-5" id="countANDbuy">
                     <div class="count d-flex">
                         <button class="count-btn" id="minus" onclick="decreaseQuantity()">-</button>
                         <input class="count-input" id="count-plusminus" type="text" value="1" min="1" oninput="validateQuantity()">
                         <button class="count-btn" id="plus" onclick="increaseQuantity()">+</button>
                     </div>
-                    <button class="btn btn-dark rounded-pill px-3" type="button" id="btn-buy">Купить</button>
+                    <button class="btn btn-dark rounded-pill px-3" type="button" value="{{product.id}}" id="btn-buy">Купить</button>
                 </div>
                 <div class="product-title mt-3">
                     <p class="product-name">Описание</p>
                     <p class="product-description mt-3">{{product.description}}</p>
                     {% for ch in product.product_character.all %}
-                    <p class="product-description mt-3">{{ch}}</p>
+                    <p class="product-description mt-3">{{ch.characteristic}}</p>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div>
     <link rel="stylesheet" href="{%static 'store/css/product_detail.css'%}">
-    <script src="{%static 'store/script/jquery-3.7.0.min.js'%}"></script>
     <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
     <script src="{%static 'store/script/product_detail.js'%}"></script>
-    <script>
-        function increaseQuantity() {
-          var quantityField = document.getElementById("count-plusminus");
-          var quantity = parseInt(quantityField.value);
-          quantityField.value = quantity + 1;
-        }
-        function decreaseQuantity() {
-          var quantityField = document.getElementById("count-plusminus");
-          var quantity = parseInt(quantityField.value);
-          if (quantity > 1) {
-            quantityField.value = quantity - 1;
-          }
-        }
-        function validateQuantity() {
-            var quantityField = document.getElementById("count-plusminus");
-            var quantity = parseInt(quantityField.value);
-            if (isNaN(quantity) || quantity < 1) {
-              quantityField.value = 1;
-            }
-        }
-      </script>
 </main>
+<script>
+    function increaseQuantity() {
+      var quantityField = document.getElementById("count-plusminus");
+      var quantity = parseInt(quantityField.value);
+      quantityField.value = quantity + 1;
+    }
+    function decreaseQuantity() {
+      var quantityField = document.getElementById("count-plusminus");
+      var quantity = parseInt(quantityField.value);
+      if (quantity > 1) {
+        quantityField.value = quantity - 1;
+      }
+    }
+    function validateQuantity() {
+        var quantityField = document.getElementById("count-plusminus");
+        var quantity = parseInt(quantityField.value);
+        if (isNaN(quantity) || quantity < 1) {
+          quantityField.value = 1;
+        }
+    }
+    $(document).on('click', '#btn-buy', function (e) {
+        e.preventDefault();
+        var quantityField = document.getElementById("count-plusminus");
+        var quantity = parseInt(quantityField.value);
+        $.ajax({
+            type: 'POST',
+            url: '{% url "basket:basket_add" %}',
+            data: {
+                productid: $('#btn-buy').val(),
+                productqty: quantity,
+                csrfmiddlewaretoken: "{{csrf_token}}",
+                action: 'post'
+            },
+            success: function (json) {
+                var l = "В корзине";
+                document.getElementById("btn-buy").innerHTML = l;
+            },
+            error: function (xhr, errmsg, err) {}
+        });
+    })
+</script>
 {% endblock %}
